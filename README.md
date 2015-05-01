@@ -6,7 +6,7 @@ Requirements: Python 3.4 +
 
 Usage: python3 countdown_nubers.py [numbers -g goal]
 
-If you omit numbers and goal, it will generate a random problem and solve it.
+If you don't provide numbers or a goal, then the solver will generate random ones.
 
 examples:
 

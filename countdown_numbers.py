@@ -140,17 +140,17 @@ def report_path(path):
         ))
 
 
-def generate_problem(nlarge=1):
+def generate_numbers(nlarge=1):
     assert 0 <= nlarge <= 4
     nsmall = 6 - nlarge
 
     large = [25, 50, 75, 100]
     small = 2 * list(range(1, 11))
 
-    numbers = random.sample(large, nlarge) + random.sample(small, nsmall)
-    goal = random.randrange(101, 1000)
+    return random.sample(large, nlarge) + random.sample(small, nsmall)
 
-    return numbers, goal
+def generate_goal():
+    return random.randrange(101, 1000)
 
 
 def main():
@@ -174,10 +174,13 @@ def main():
     numbers = args.numbers
     goal = args.goal
 
-    if (not numbers) and (goal == -1):
-        numbers, goal = generate_problem(
+    if not numbers:
+        numbers = generate_numbers(
             nlarge=random.randrange(0, 5)
         )
+    
+    if goal == -1:
+        goal = generate_goal()
 
     c = CountDownNumbers(numbers, goal)
     tolerance = 0
