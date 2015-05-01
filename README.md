@@ -1,5 +1,7 @@
 # Countdown Numbers Solver
 
+http://en.wikipedia.org/wiki/Countdown_%28game_show%29#Numbers_round
+
 Requirements: Python 3.4 + 
 
 Usage: python3 countdown_nubers.py [numbers -g goal]
