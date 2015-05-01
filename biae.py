@@ -1,3 +1,4 @@
+from functools import total_ordering
 from enum import Enum
 from collections import deque
 
@@ -31,7 +32,7 @@ def precedence(operator):
 def associative(operator):
     return operator in ('+', '*')
 
-
+@total_ordering
 class BinaryIntegerArithmeticExpression:
     _value = None
     o1 = None
@@ -94,6 +95,9 @@ class BinaryIntegerArithmeticExpression:
 
     def __str__(self):
         return self.rep()
+        
+    def __lt__(self, other):
+        return self.value < other.value
 
     @classmethod
     def parse(cls, s):

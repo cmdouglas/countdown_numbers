@@ -97,7 +97,7 @@ class SearchNode(object):
     def __lt__(self, other):
         # for the most part, these will be compared based on their g+h values.
         # this is a tie-breaker for when those are equal
-
+        
         return self.id(self) < other.id(other)
 
 
