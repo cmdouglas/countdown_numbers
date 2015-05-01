@@ -52,11 +52,15 @@ class CountDownNumbers:
                 moves.extend([
                     (n1, '+', n2),
                     (n1, '*', n2),
-                    (n1, '-', n2),
-                    (n2, '-', n1)
                 ])
                 
+                #disallow negative numbers
+                if n1 >= n2:
+                    moves.append((n1, '-', n2))
+                else:
+                    moves.append((n2, '-', n1))
                 
+                #disallow fractions
                 if n2 != 0 and n1 % n2 == 0:
                     moves.append((n1, '/', n2))
                     
