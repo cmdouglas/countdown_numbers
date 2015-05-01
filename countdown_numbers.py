@@ -17,18 +17,16 @@ def get_result(n1, n2, operator):
         
     return result
 
-class CountDownException(Exception):
+class CountDownNumbersException(Exception):
     pass
 
-class CountDown:
+class CountDownNumbers:
     
     def __init__(self, numbers, goal):
         self.numbers = numbers
         self.goal = goal
         
     def find_solution(self, tolerance=0):
-        
-        
         def _id(node):
             numbers = node.data['numbers']
             return tuple(sorted(numbers))
@@ -142,14 +140,14 @@ if __name__ == '__main__':
     parser.add_argument("-t", "--tolerance", default=0, type=int, nargs="?", help="the error tolerance, i.e. 1 will allow for solutions +/1 1 from the goal")
     args = parser.parse_args()
     
-    c = CountDown(args.numbers, args.goal)
+    c = CountDownNumbers(args.numbers, args.goal)
     
     try:
         path, expression = c.find_solution(tolerance=args.tolerance)
         report_path(path)
         print("\nSolution: {e}".format(e=expression))
         
-    except CountDownException as e:
+    except CountDownNumbersException as e:
         print("No solution.")
         
     
