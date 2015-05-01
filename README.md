@@ -2,7 +2,7 @@
 
 Requirements: Python 3.4 + 
 
-Usage: python3 countdown_nubers.py <numbers> -g <goal> [-t <tolerance>]
+Usage: python3 countdown_nubers.py numbers -g goal [-t tolerance]
 
 examples:
 
