@@ -133,7 +133,7 @@ class AStarSearch(object):
             _, current = heapq.heappop(frontier)
 
             if self.is_goal(current):
-                return current.get_path()
+                return True, current.get_path()
 
             for new in current.expand():
                 if (new.id(new) in visited and
@@ -154,4 +154,4 @@ class AStarSearch(object):
 
                 visited[new.id(new)] = new
 
-        return None
+        return False, None

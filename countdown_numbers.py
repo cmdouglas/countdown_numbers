@@ -94,10 +94,19 @@ class CountDownNumbers:
 
         search = AStarSearch(start_node, is_goal, heuristic)
 
-        path = search.do_search()
+        result, path = search.do_search()
 
-        if not path:
+        if not result:
             raise CountDownNumbersException("No path found.")
+            
+        # special case: the solution was already in the numbers
+        if not path:
+            expressions = [E(number) for number in self.numbers]
+            mindiff, expression = min([
+                (abs(e.value-self.goal), e) for e in expressions
+            ])
+            
+            return [], expression
 
         return path, self.moves_to_expression(path)
 
