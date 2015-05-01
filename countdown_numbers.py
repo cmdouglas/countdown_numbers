@@ -92,7 +92,7 @@ class CountDownNumbers:
         path = search.do_search()
         
         if not path:
-            raise CountDownException("No path found.")
+            raise CountDownNumbersException("No path found.")
             
             
         return path, self.moves_to_expression(path)
@@ -145,7 +145,12 @@ if __name__ == '__main__':
     try:
         path, expression = c.find_solution(tolerance=args.tolerance)
         report_path(path)
-        print("\nSolution: {e}".format(e=expression))
+        print("\nSolution: {e} = {v}".format(e=expression, v=expression.value))
+        
+        error = abs(expression.value - c.goal)
+        if error > 0:
+            print ("({error} away)".format(error=error))
+        
         
     except CountDownNumbersException as e:
         print("No solution.")
