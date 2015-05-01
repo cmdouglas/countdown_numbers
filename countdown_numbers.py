@@ -5,6 +5,21 @@ from itertools import combinations
 from biae import BinaryIntegerArithmeticExpression as E
 from search import SearchNode, AStarSearch
 
+def get_result(n1, n2, operator):
+    if operator == '+':
+        result = n1 + n2
+    elif operator == '-':
+        result = n1 - n2
+    elif operator == '*':
+        result = n1 * n2
+    elif operator == '/':
+        result = int(n1 / n2)
+        
+    return result
+
+class CountDownException(Exception):
+    pass
+
 class CountDown:
     
     def __init__(self, numbers, goal):
@@ -12,64 +27,64 @@ class CountDown:
         self.goal = goal
         
     def find_solution(self, tolerance=0):
+        
+        
         def _id(node):
-            expressions = node.data['expressions']
-            expressions = sorted(expressions, key=lambda e: e.value)
-            return ";".join([str(e) for e in expressions])
+            numbers = node.data['numbers']
+            return tuple(sorted(numbers))
+            
             
         def is_goal(node):
-            expressions = node.data['expressions']
-            for e in expressions:
-                if abs(e.value - self.goal) <= tolerance:
+            numbers = node.data['numbers']
+            for number in numbers:
+                if abs(number - self.goal) <= tolerance:
                     return True
             
             return False
             
         def heuristic(node):
-            expressions = node.data['expressions']
-            diffs = [abs(e.value - self.goal) for e in expressions]
-            return min(diffs)
+            numbers = node.data['numbers']
+            diffs = [abs(n - self.goal) for n in numbers]
+            return max(diffs)
             
         def possible_moves(node):
-            expressions = node.data['expressions']
+            numbers = node.data['numbers']
             moves = []
-            for (op1, op2) in combinations(expressions, 2):
+            for (n1, n2) in combinations(numbers, 2):
                 moves.extend([
-                    (op1, '+', op2, op1.value + op2.value),
-                    (op1, '*', op2, op1.value * op2.value),
-                    (op1, '-', op2, op1.value - op2.value),
-                    (op2, '-', op1, op2.value - op1.value)
+                    (n1, '+', n2),
+                    (n1, '*', n2),
+                    (n1, '-', n2),
+                    (n2, '-', n1)
                 ])
                 
                 
-                if op2.value > 0 and op1.value % op2.value == 0:
-                    moves.append((op1, '/', op2, int(op1.value / op2.value)))
+                if n2 != 0 and n1 % n2 == 0:
+                    moves.append((n1, '/', n2))
                     
-                if op1.value > 0 and op2.value % op1.value == 0:
-                    moves.append((op2, '/', op1, int(op2.value / op1.value)))
+                if n1 != 0 and n2 % n1 == 0:
+                    moves.append((n2, '/', n1))
                     
             return moves
             
         def apply_move(node, move):
-            op1, operator, op2, value = move;
-            expressions = node.data['expressions'][:]
-            expressions.remove(op1)
-            expressions.remove(op2)
+            n1, operator, n2 = move;
+            numbers = node.data['numbers'][:]
+            numbers.remove(n1)
+            numbers.remove(n2)
             
-            new_expression = E(op1=op1, op2=op2, o=operator)
-            expressions.append(new_expression)
+            result = get_result(n1, n2, operator)
+            
+            numbers.append(result)
             data = {
-                'expressions': expressions
+                'numbers': numbers
             }
             
             return SearchNode(data, _id, possible_moves, apply_move)
             
-        expressions = []
-        for number in self.numbers:
-            expressions.append(E(number))
             
         data = {
-            'expressions': expressions
+            'numbers': self.numbers
         }
         
         start_node = SearchNode(data, _id, possible_moves, apply_move)
@@ -79,29 +94,67 @@ class CountDown:
         path = search.do_search()
         
         if not path:
-            return "No solution found"
+            raise CountDownException("No path found.")
+            
+            
+        return path, self.moves_to_expression(path)
+            
+    def moves_to_expression(self, moves):
         
-        for move, node in path:
-            op1, operator, op2, value = move
-            print ("{op1} {operator} {op2} = {val}".format(
-                op1=op1.value,
-                op2=op2.value,
-                operator=operator,
-                val=value
-            ))
+        def extract_expression(expressions, val):
+            to_extract = None
+            for e in expressions:
+                if e.value == val:
+                    to_extract = e
+                    break
+            expressions.remove(to_extract)
+            return to_extract
+            
+        expressions = [E(n) for n in self.numbers]
+        for move in moves:
+            n1, op, n2 = move
+            e1 = extract_expression(expressions, n1)
+            e2 = extract_expression(expressions, n2)
+            
+            result = E(op1=e1, op2=e2, o=op)
+            expressions.append(result)
         
+        mindiff, expression = min([(abs(e.value-self.goal), e) for e in expressions])
         
-        for e in node.data['expressions']:
-            if abs(e.value - self.goal) <= tolerance:
-                return e
+        return expression
+        
+
+def report_path(path):
+    for move in path:
+        n1, operator, n2 = move
+                
+        print ("{n1} {operator} {n2} = {val}".format(
+            n1=n1,
+            n2=n2,
+            operator=operator,
+            val=get_result(n1, n2, operator)
+        ))
                 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("numbers", type=int, nargs='+')
-    parser.add_argument("-g", "--goal", type=int)
+    parser.add_argument("numbers", type=int, nargs='+', help="the numbers used to find the goal")
+    parser.add_argument("-g", "--goal", type=int, help="the goal")
+    parser.add_argument("-t", "--tolerance", default=0, type=int, nargs="?", help="the error tolerance, i.e. 1 will allow for solutions +/1 1 from the goal")
     args = parser.parse_args()
     
     c = CountDown(args.numbers, args.goal)
-    print(c.find_solution())
+    
+    try:
+        path, expression = c.find_solution(tolerance=args.tolerance)
+        report_path(path)
+        print("\nSolution: {e}".format(e=expression))
+        
+    except CountDownException as e:
+        print("No solution.")
+        
+    
+    
+    
+    
         
             

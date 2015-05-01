@@ -82,7 +82,7 @@ class SearchNode(object):
         
         n = self
         while n.parent:
-            moves.append((n.move_to_reach, n))
+            moves.append(n.move_to_reach)
             n = n.parent
             
         return [m for m in reversed(moves)]
